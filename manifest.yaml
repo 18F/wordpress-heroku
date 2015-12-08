@@ -1,0 +1,8 @@
+---
+applications:
+- name: testwordpress
+  memory: 128M
+  path: .
+  buildpack: https://github.com/cloudfoundry/php-buildpack
+  services:
+  - mysql-service
