@@ -1,4 +1,4 @@
-# WordPress Heroku
+# WordPress Cloud.gov
 
 This project is a template for installing and running [WordPress](http://wordpress.org/) on [Heroku](http://www.heroku.com/). The repository comes bundled with:
 * [Amazon S3 and Cloudfront](https://wordpress.org/plugins/amazon-s3-and-cloudfront/)
