@@ -15,24 +15,19 @@
  */
 
 // ** Heroku Postgres settings - from Heroku Environment ** //
-$db = parse_url($_ENV["DATABASE_URL"]);
-
+$services = json_decode($_ENV['VCAP_SERVICES'], true);
+$db = $services['mysql56'][0];  // pick the first MySQL service
 // ** MySQL settings - You can get this info from your web host ** //
 /** The name of the database for WordPress */
-define('DB_NAME', trim($db["path"],"/"));
-
+define('DB_NAME', $db['credentials']['dbname']);
 /** MySQL database username */
-define('DB_USER', $db["user"]);
-
+define('DB_USER', $db['credentials']['username']);
 /** MySQL database password */
-define('DB_PASSWORD', $db["pass"]);
-
+define('DB_PASSWORD', $db['credentials']['password']);
 /** MySQL hostname */
-define('DB_HOST', $db["host"]);
-
+define('DB_HOST', $db['credentials']['hostname'] . ':' . $db['credentials']['port']);
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
-
 /** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
 
@@ -45,18 +40,21 @@ define('DB_COLLATE', '');
  *
  * @since 2.6.0
  */
-define('AUTH_KEY',              getenv('AUTH_KEY'));
-define('SECURE_AUTH_KEY',       getenv('SECURE_AUTH_KEY'));
-define('LOGGED_IN_KEY',         getenv('LOGGED_IN_KEY'));
-define('NONCE_KEY',             getenv('NONCE_KEY'));
-define('AUTH_SALT',             getenv('AUTH_SALT'));
-define('SECURE_AUTH_SALT',      getenv('SECURE_AUTH_SALT'));
-define('LOGGED_IN_SALT',        getenv('LOGGED_IN_SALT'));
-define('NONCE_SALT',            getenv('NONCE_SALT'));
-define('AWS_ACCESS_KEY_ID',     getenv('AWS_ACCESS_KEY_ID'));
-define('AWS_SECRET_ACCESS_KEY', getenv('AWS_SECRET_ACCESS_KEY'));
+ define('AUTH_KEY', 					$_ENV['AUTH_KEY']);
+  define('SECURE_AUTH_KEY', 	$_ENV['SECURE_AUTH_KEY']);
+  define('LOGGED_IN_KEY', 		$_ENV['LOGGED_IN_KEY']);
+  define('NONCE_KEY', 				$_ENV['NONCE_KEY']);
+  define('AUTH_SALT', 				$_ENV['AUTH_SALT']);
+  define('SECURE_AUTH_SALT', 	$_ENV['SECURE_AUTH_SALT']);
+  define('LOGGED_IN_SALT', 		$_ENV['LOGGED_IN_SALT']);
+  define('NONCE_SALT', 				$_ENV['NONCE_SALT']);
 
 /**#@-*/
+
+/**/
+$s3 = $services['s3'][0];
+define('AWS_ACCESS_KEY_ID', $s3['credentials']['access_key_id']);
+define('AWS_SECRET_ACCESS_KEY', $s3['credentials']['secret_access_key']);
 
 /**
  * WordPress Database Table prefix.
