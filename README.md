@@ -1,106 +1,59 @@
 # WordPress Heroku
 
 This project is a template for installing and running [WordPress](http://wordpress.org/) on [Heroku](http://www.heroku.com/). The repository comes bundled with:
-* [PostgreSQL for WordPress](http://wordpress.org/extend/plugins/postgresql-for-wordpress/)
 * [Amazon S3 and Cloudfront](https://wordpress.org/plugins/amazon-s3-and-cloudfront/)
 * [WP Sendgrid](https://wordpress.org/plugins/wp-sendgrid/)
 * [Wordpress HTTPS](https://wordpress.org/plugins/wordpress-https/)
 
 ## Installation
 
-Clone the repository from Github
+1. Clone the app (i.e. this repo).
 
-    $ git clone git://github.com/mhoofman/wordpress-heroku.git
+  ```bash
+  git clone https://github.com/18F/cf-ex-wordpress.git cf-ex-wordpress
+  cd cf-ex-wordpress
+  ```
 
-With the [Heroku gem](http://devcenter.heroku.com/articles/heroku-command), create your app
+1. Create a service instance of a MySQL Database
+View Services  
+`cf marketplace`  
+View Specific Service Plans  
+Template: `cf marketplace -s SERVICE`  
+Example: `cf marketplace -s mysql56`  
+Create Service Instance  
+Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`  
+Example: `cf create-service mysql56 free mysql-service`  
 
-    $ cd wordpress-heroku
-    $ heroku create
-    Creating strange-turtle-1234... done, stack is cedar
-    http://strange-turtle-1234.herokuapp.com/ | git@heroku.com:strange-turtle-1234.git
-    Git remote heroku added
+2. Create a service instance of S3
+Template: `cf create-service SERVICE PLAN SERVICE_INSTANCE`  
+Example: `cf create-service s3service free SERVICE_INSTANCE`  
 
-Add a database to your app
+3. Edit the manifest.yml file.  Change the 'host' attribute to something unique.  Then under "services:" change "mysql-service" to the name of your MySQL service.  This is the name of the service that will be bound to your application and thus used by Wordpress.
 
-    $ heroku addons:create heroku-postgresql
-    Creating HEROKU_POSTGRESQL_INSTANCE... done, (free)
-    Adding HEROKU_POSTGRESQL_INSTANCE to strange-turtle-1234... done
-    Setting DATABASE_URL and restarting strange-turtle-1234... done, v3
-    Database has been created and is available
-     ! This database is empty. If upgrading, you can transfer
-     ! data from another database with pgbackups:restore
-    Use `heroku addons:docs heroku-postgresql` to view documentation.
+4. Deploy the app with a no start command
+`cf push --no-start`
 
-Promote the database (replace HEROKU_POSTGRESQL_INSTANCE with the name from the above output)
+5. Set environment variables for secret keys using [Wordpress Secret Key Generator](https://api.wordpress.org/secret-key/1.1/salt/)
+```bash
+cf set-env mywordpress-new AUTH_KEY YOUR_KEY
+cf set-env mywordpress-new SECURE_AUTH_KEY YOUR_KEY
+cf set-env mywordpress-new LOGGED_IN_KEY YOUR_KEY
+cf set-env mywordpress-new NONCE_KEY YOUR_KEY
+cf set-env mywordpress-new AUTH_SALT YOUR_KEY
+cf set-env mywordpress-new SECURE_AUTH_SALT YOUR_KEY
+cf set-env mywordpress-new LOGGED_IN_SALT YOUR_KEY
+cf set-env mywordpress-new NONCE_SALT YOUR_KEY
+```
 
-    $ heroku pg:promote HEROKU_POSTGRESQL_INSTANCE
-    Promoting HEROKU_POSTGRESQL_INSTANCE to DATABASE_URL... done
-    Ensuring an alternate alias for existing DATABASE... done, HEROKU_POSTGRESQL_COLOR
-    Promoting HEROKU_POSTGRESQL_INSTANCE to DATABASE_URL on strange-turtle-1234... done
+6. Push it to CloudFoundry.
 
-Add the ability to send email (i.e. Password Resets etc)
-
-    $ heroku addons:create sendgrid:starter
-    Creating SENDGRID_INSTANCE... done, (free)
-    Adding SENDGRID_INSTANCE to strange-turtle-1234... done
-    Setting SENDGRID_PASSWORD, SENDGRID_USERNAME and restarting strange-turtle-1234... done, v7
-    Use `heroku addons:docs sendgrid` to view documentation.
-
-Create a new branch for any configuration/setup changes needed
-
-    $ git checkout -b production
-
-Store unique keys and salts in Heroku environment variables. Wordpress can provide random values [here](https://api.wordpress.org/secret-key/1.1/salt/).
-
-    heroku config:set AUTH_KEY='put your unique phrase here' \
-      SECURE_AUTH_KEY='put your unique phrase here' \
-      LOGGED_IN_KEY='put your unique phrase here' \
-      NONCE_KEY='put your unique phrase here' \
-      AUTH_SALT='put your unique phrase here' \
-      SECURE_AUTH_SALT='put your unique phrase here' \
-      LOGGED_IN_SALT='put your unique phrase here' \
-      NONCE_SALT='put your unique phrase here'
-
-Deploy to Heroku
-
-    $ git push heroku production:master
-    -----> Deleting 0 files matching .slugignore patterns.
-    -----> PHP app detected
-
-     !     WARNING: No composer.json found.
-           Using index.php to declare PHP applications is considered legacy
-           functionality and may lead to unexpected behavior.
-
-    -----> No runtime requirements in composer.json, defaulting to PHP 5.6.2.
-    -----> Installing system packages...
-           - PHP 5.6.2
-           - Apache 2.4.10
-           - Nginx 1.6.0
-    -----> Installing PHP extensions...
-           - zend-opcache (automatic; bundled, using 'ext-zend-opcache.ini')
-    -----> Installing dependencies...
-           Composer version 1.0-dev (ffffab37a294f3383c812d0329623f0a4ba45387) 2014-11-05 06:04:18
-           Loading composer repositories with package information
-           Installing dependencies
-           Nothing to install or update
-           Generating optimized autoload files
-    -----> Preparing runtime environment...
-           NOTICE: No Procfile, defaulting to 'web: vendor/bin/heroku-php-apache2'
-    -----> Discovering process types
-           Procfile declares types -> web
-
-    -----> Compressing... done, 78.5MB
-    -----> Launcing... done, v5
-           http://strange-turtle-1234.herokuapp.com deployed to Heroku
-
-    To git@heroku:strange-turtle-1234.git
-      * [new branch]    production -> master
-
-After deployment WordPress has a few more steps to setup and thats it!
+```bash
+cf push
+```
 
 ## Usage
 
-Because a file cannot be written to Heroku's file system, updating and installing plugins or themes should be done locally and then pushed to Heroku.
+Because a file cannot be written to Cloud Foundry's file system, updating and installing plugins or themes should be done locally and then pushed to Cloud Foundry.
 
 ## Updating
 
